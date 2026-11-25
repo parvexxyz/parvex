@@ -30,6 +30,12 @@ export default function TokenPage() {
       <section className="sheet">
         <div className="wrap grid gap-10 py-14 lg:grid-cols-[1.2fr_1fr]">
           <div className="grid content-start gap-5">
+            <div className="flex items-center gap-4">
+              <img src="/brand/mark-tile.webp?v=dc0b0043" alt={`${BRAND.tokenName} logo`} width={72} height={72} className="rounded-[14px]" data-testid="token-logo" />
+              <p className="text-[22px] tracking-[-0.02em]">
+                {BRAND.tokenName} <span className="text-[var(--text-2)]">{BRAND.symbol}</span>
+              </p>
+            </div>
             <p className="label">Contract address</p>
             <CaBox testid="token-ca" />
             <p className="small muted">{TOKEN.isLive ? "This is the only address. Parvex will never DM you first or ask you to send tokens." : "Not launched yet. The address appears here, in the header and in the footer the moment it exists. Launchpad: TBA. Until then, any token claiming to be ours is not."}</p>

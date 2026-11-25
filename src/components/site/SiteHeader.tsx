@@ -75,9 +75,7 @@ function MobileMenu({ onClose, path }: { onClose: () => void; path: string }) {
   return createPortal(
     <div className="hd-menu" role="dialog" aria-modal="true" aria-label="Menu" ref={trap} data-testid="menu">
       <div className="wrap flex h-[82px] items-center justify-between">
-        <span className="text-[var(--text)]">
-          <Wordmark size={24} />
-        </span>
+        <Wordmark size={24} light />
         <button type="button" className="rq-iconbtn" aria-label="Close the menu" onClick={onClose}>
           <CloseIcon size={16} />
         </button>

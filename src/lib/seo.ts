@@ -25,13 +25,13 @@ export function pageMeta({
 }): Metadata {
   const url = `${BRAND.url}${path === "/" ? "" : path}`;
   // Child routes that set openGraph replace the inherited file-based image, so name it explicitly.
-  const images = [{ url: "/opengraph-image.jpg?v=7cf95f7a", width: 1200, height: 630, alt: `Parvex share card: neon green ribbons on black, the line Agree inside your limits. Settle in one swap., and the Parvex mark.` }];
+  const images = [{ url: "/opengraph-image.jpg?v=29f3db72", width: 1200, height: 630, alt: `Parvex banner: the line Agent-assisted OTC negotiation with clear limits and wallet approval, over neon green ribbons on black.` }];
   return {
     title: { absolute: title },
     description,
     alternates: { canonical: url },
     openGraph: { type, url, siteName: BRAND.name, title, description, locale: "en_US", images },
-    twitter: { card: "summary_large_image", site: BRAND.xHandle, creator: BRAND.xHandle, title, description, images: [{ url: "/twitter-image.jpg?v=7cf95f7a", alt: `Parvex share card: neon green ribbons on black, the line Agree inside your limits. Settle in one swap., and the Parvex mark.` }] },
+    twitter: { card: "summary_large_image", site: BRAND.xHandle, creator: BRAND.xHandle, title, description, images: [{ url: "/twitter-image.jpg?v=29f3db72", alt: `Parvex banner: the line Agent-assisted OTC negotiation with clear limits and wallet approval, over neon green ribbons on black.` }] },
     robots: noindex ? { index: false, follow: true } : undefined,
   };
 }
