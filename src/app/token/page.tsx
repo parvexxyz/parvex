@@ -7,14 +7,14 @@ import { pageMeta } from "@/lib/seo";
 export const metadata = pageMeta({
   path: "/token",
   title: `${BRAND.symbol} token | Parvex`,
-  description: `${BRAND.symbol} on Robinhood Chain: contract address, where it launches, and its planned utility. Parvex works fully without the token.`,
+  description: `${BRAND.symbol} on Robinhood Chain: contract address, where it launches, and its token features. Parvex works fully without the token.`,
 });
 
 export default function TokenPage() {
   return (
     <>
       <PageHead eyebrow={`${BRAND.symbol} · Robinhood Chain`} title={`${BRAND.tokenName} (${BRAND.symbol})`}>
-        <p>Parvex works fully without the token: practice, matching, the agent, signing and settlement need none. Utility is planned, not built.</p>
+        <p>Parvex works fully without the token: practice, matching, the agent, signing and settlement need none. Token features are concepts, not built.</p>
       </PageHead>
       <section className="sheet">
         <div className="wrap grid gap-10 py-14 lg:grid-cols-[1.2fr_1fr]">
@@ -34,7 +34,7 @@ export default function TokenPage() {
             </div>
           </div>
           <div className="grid content-start gap-4">
-            <p className="label">Planned utility</p>
+            <p className="label">Token features</p>
             {[
               ["Desk features", "Saved counterparty lists, order relay between desks and alerts, once they exist."],
               ["Discovery network access", "Listing signed orders on a shared network (Concept today: orders move as files)."],
