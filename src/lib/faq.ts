@@ -23,12 +23,16 @@ export const FAQ: Faq[] = [
     a: "A transaction that reverts leaves no event. That is why the terminal asks the contract's checkDeal view first and shows every failing reason with its numbers before any wallet opens, and the dashboard keeps those refusals in this browser.",
   },
   {
+    q: "How do alerts work?",
+    a: "The bell in the header lists, for your connected wallet, deals of yours that settled (read from the settler's events), board orders that match yours, counter-offers to your orders and your orders about to expire. Enable browser notifications to get them while a Parvex tab is open. Free for everyone, web only: no email, no push service, nothing stored on a server.",
+  },
+  {
     q: "Mainnet or testnet?",
     a: "Both. Robinhood Chain (4663) and Robinhood Chain Testnet (46630) are selectable; the settler must be deployed on the network you pick. Practice mode needs neither: it runs on sample mandates in your browser.",
   },
   {
     q: "Do I need the $PARVEX token?",
-    a: "No. Everything on this site works without it. Token utility is planned, not built.",
+    a: "No. Everything works without it, including the order board and alerts. Holding at least 0.1 % of the supply (read live on chain after a gas-free sign-in) raises two quotas: live orders on the board (3 to 25) and saved counterparties (5 to 100). No rewards, discounts or value of any kind are promised.",
   },
   {
     q: "Is Parvex connected to Robinhood?",

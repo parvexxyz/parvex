@@ -14,6 +14,8 @@ export function GET() {
     `Method, net math and reason bits: ${BRAND.url}/method`,
     `Assets API (JSON, proven stock tokens + quotes): ${BRAND.url}/api/assets`,
     `Settlement proofs API (JSON): ${BRAND.url}/api/desk?net=mainnet|testnet`,
+    `Order relay board (JSON, open to read): ${BRAND.url}/api/board?net=mainnet|testnet`,
+    `Holder threshold (JSON): ${BRAND.url}/api/holder`,
     `ParvexMandateSettler on ${NETWORKS.mainnet.name}: ${settlerOf("mainnet") ?? "not deployed yet"}`,
     `ParvexMandateSettler on ${NETWORKS.testnet.name}: ${settlerOf("testnet") ?? "not deployed yet"}`,
     "",

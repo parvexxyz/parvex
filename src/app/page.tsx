@@ -83,8 +83,10 @@ const FEATURES: { t: string; s: "Prototype" | "Concept"; href?: string }[] = [
   { t: "Cancel one order or all below a nonce", s: "Prototype", href: "/dashboard" },
   { t: "Robinhood Chain Testnet", s: "Prototype", href: "/terminal" },
   { t: "Signed order hand-off as a file", s: "Prototype", href: "/terminal" },
-  { t: "Counterparty discovery network", s: "Concept", href: "/method#planned" },
-  { t: `${BRAND.symbol} utility`, s: "Concept", href: "/token" },
+  { t: "Order relay board (post, take, withdraw)", s: "Prototype", href: "/terminal#board" },
+  { t: "Alerts: bell + browser notifications", s: "Prototype", href: "/method#alerts" },
+  { t: `${BRAND.symbol} holder tier (0.1 % of supply)`, s: "Prototype", href: "/token" },
+  { t: "Partial fills", s: "Concept", href: "/method#planned" },
 ];
 
 export default function Home() {

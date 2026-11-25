@@ -2,6 +2,9 @@
 
 import { encodeFunctionData, type Hex } from "viem";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { BoardPane } from "@/components/holder/BoardPane";
+import { HolderPanel } from "@/components/holder/HolderPanel";
+import { useHolder } from "@/components/holder/useHolder";
 import { MandateForm } from "@/components/terminal/MandateForm";
 import { useWallet } from "@/components/wallet/WalletProvider";
 import { useWalletModal } from "@/components/wallet/WalletButton";
@@ -45,6 +48,8 @@ export function Terminal() {
   const [msg, setMsg] = useState<{ ok: boolean; text: string; tx?: string } | null>(null);
   const [importText, setImportText] = useState("");
   const [exported, setExported] = useState<string | null>(null);
+  const [takenFrom, setTakenFrom] = useState<Record<string, string>>({});
+  const holder = useHolder();
 
   useEffect(() => {
     setMine(loadBook());
@@ -277,9 +282,27 @@ export function Terminal() {
     navigator.clipboard?.writeText(text).catch(() => {});
   }
 
-  async function importOrder() {
+  async function postToBoard(side: "seller" | "buyer") {
+    const s = side === "seller" ? sellSig : buySig;
+    const other = side === "seller" ? buy : sell;
+    if (!s || !settler) return;
+    setBusy(`post-${side}`);
+    try {
+      const signed = encodeSigned(deser(s.order), s.signature, s.chainId, s.settler);
+      const j = await holder.call("/api/board", { action: "post", signed, replyTo: other ? (takenFrom[other.id] ?? null) : null });
+      addLog({ kind: "offer", net, title: "Posted a signed order to the board", detail: `${j.live} of ${j.quota} live orders (${j.tier} tier)` });
+      setMsg({ ok: true, text: `Posted to the board: ${j.live} of ${j.quota} live orders on the ${j.tier} tier.` });
+      window.dispatchEvent(new Event("px-board"));
+    } catch (e) {
+      setMsg({ ok: false, text: e instanceof Error ? e.message : "Post failed." });
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function importOrder(text = importText, boardId: string | null = null) {
     setMsg(null);
-    const d = decodeSigned(importText.trim());
+    const d = decodeSigned(text.trim());
     if (!d) return setMsg({ ok: false, text: "That is not a Parvex signed order (JSON from Export)." });
     if (d.chainId !== chainId || !settler || !same(d.settler, settler)) return setMsg({ ok: false, text: `This order is for chain ${d.chainId} and settler ${short(d.settler)}; the terminal is on ${NETWORKS[net].name}${settler ? ` with settler ${short(settler)}` : " with no settler"}.` });
     const o = d.order;
@@ -318,6 +341,7 @@ export function Terminal() {
       saveSigs(nextSigs);
       if (m.side === "sell") setSellId(id);
       else setBuyId(id);
+      if (boardId) setTakenFrom((t) => ({ ...t, [id]: boardId }));
       setImportText("");
       addLog({ kind: "signed", net, title: `Imported a signed order from ${short(o.maker)}`, detail: `${m.label}, gross ${fromUnits(o.quoteGross, quote.decimals)} ${quote.symbol}` });
       setMsg({ ok: true, text: "Imported. Its price is locked by the signature; pick or create your side with the same asset and amount." });
@@ -609,6 +633,11 @@ export function Terminal() {
                                 Export
                               </button>
                             ) : null}
+                            {s.how === "signature" && address && same(String(s.order.maker), address) ? (
+                              <button type="button" className="btn btn-neon btn-xs" disabled={busy !== null || !holder.session} title={holder.session ? "" : "Sign a holder session first (below)"} onClick={() => postToBoard(side)} data-testid={`post-${side}`}>
+                                {busy === `post-${side}` ? "Posting…" : "Post to board"}
+                              </button>
+                            ) : null}
                           </>
                         ) : (side === "seller" ? iAmSeller : iAmBuyer) ? (
                           <>
@@ -688,11 +717,21 @@ export function Terminal() {
             </div>
           ) : null}
 
+          <BoardPane
+            net={net}
+            onTake={(signed, id) => importOrder(signed, id)}
+            symbols={(a) => {
+              const t = [...bases, ...quotes].find((x) => same(x.address, a));
+              return t ? { symbol: t.symbol, decimals: t.decimals } : null;
+            }}
+          />
+          <HolderPanel />
+
           <div className="pane">
             <div className="pane-h">Import a signed order</div>
             <div className="pane-b grid gap-2">
               <textarea className="inp" placeholder='{"v":1,"chainId":4663,…}' value={importText} onChange={(e) => setImportText(e.target.value)} data-testid="import-text" />
-              <button type="button" className="btn btn-line btn-sm" onClick={importOrder} disabled={!importText.trim()} data-testid="import-go">
+              <button type="button" className="btn btn-line btn-sm" onClick={() => importOrder()} disabled={!importText.trim()} data-testid="import-go">
                 Import
               </button>
               <p className="small muted">An order from the other side, exported from their terminal. Its terms are fixed by their signature.</p>

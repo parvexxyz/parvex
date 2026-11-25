@@ -8,18 +8,20 @@ Agent-assisted OTC negotiation with clear limits and wallet approval for Robinho
 
 This repository is the working code behind https://parvex.xyz.
 
-- **What runs today.** The terminal (mandate book, matching, zone of agreement, the negotiation agent, the deal check, review and authorize), practice mode on sample mandates with no wallet, EIP-712 order signing, export and import of signed orders between two devices, exact-amount token approvals, the contract's `checkDeal` pre-check and `settle`, and a dashboard of settlement proofs read from the contract's logs.
+- **What runs today.** The terminal (mandate book, matching, zone of agreement, the negotiation agent, the deal check, review and authorize), practice mode on sample mandates with no wallet, EIP-712 order signing, an open order relay board (post, take, withdraw; checked against the chain), export and import of signed orders, exact-amount token approvals, the contract's `checkDeal` pre-check and `settle`, a dashboard of settlement proofs read from the contract's logs, and free alerts (a bell inbox plus browser notifications).
 - **The agent is plain code.** It is deterministic and rule-based (no language model): it sees only its own limit and the other side's last offer, never offers past its limit, and never signs anything.
 - **Live data.** Robinhood Chain head block, gas and Chainlink ETH/USD; Robinhood stock tokens proven on chain (beacon-proxy code hash, beacon slot, minted supply) with their Chainlink stock feeds; USDG and WETH metadata read on chain. Stock tokens are tokens on Robinhood Chain, not the shares themselves.
 - **The contract is not deployed yet.** `ParvexMandateSettler` is written and tested (unit, fuzz, invariant and Robinhood Chain fork tests, plus a written self-review) but has had no outside security review. Until it is deployed on a network, the terminal runs in practice mode there.
-- **Not claimed.** Nothing here is investment advice or a guarantee of safety. $PARVEX has no promised value and Parvex works without it. Planned items (an order relay network, partial fills, token utility) are not built.
+- **Token features.** A wallet holding at least 0.1 % of the $PARVEX supply (read on chain after a gas-free EIP-4361 sign-in) gets larger server quotas: 25 live orders on the board instead of 3, and 100 saved counterparties instead of 5. Until the token launches this shows "Unlocks at launch" and the free tier works fully.
+- **Not claimed.** Nothing here is investment advice or a guarantee of safety. $PARVEX has no promised value and Parvex works without it. Partial fills are planned and not built.
 
 ## Layout
 
 | Path | What it is |
 |---|---|
-| `src/app/` | Pages (`/`, `/terminal`, `/dashboard`, `/method`, `/token`, local-only `/deploy`) and API routes (`/api/chain`, `/api/assets`, `/api/desk`, `/api/rpc`). |
-| `src/components/` | Interface components: terminal, dashboard, home sections, wallet connection, header and footer. |
+| `src/app/` | Pages (`/`, `/terminal`, `/dashboard`, `/method`, `/token`, local-only `/deploy`) and API routes (`/api/chain`, `/api/assets`, `/api/desk`, `/api/rpc`, `/api/board`, `/api/holder`, `/api/lists`). |
+| `src/components/` | Interface components: terminal, dashboard, holder panel, order board, alert bell, home sections, wallet connection, header and footer. |
+| `src/lib/holder/`, `src/lib/board/` | Sign-in session verification, holder tier math and quotas, order board rules. |
 | `src/config/` | `brand.ts` (name, ticker, token address, links), `contracts.ts` (networks and deployed addresses), `dex.ts`, `chain.ts`. |
 | `src/lib/otc/` | The engine: net math, reason bits, matching, the agent, EIP-712 orders, practice mandates. |
 | `src/lib/` | Chain reads, the rate-limited RPC relay, and the logic the tests cover. |
@@ -48,7 +50,7 @@ forge test --match-contract Fork --fork-url https://rpc.mainnet.chain.robinhood.
 
 ### What was checked for this snapshot
 
-2026-11-25 (UTC), Node.js v25.8.2, forge 1.5.1: `npm run typecheck` exit 0; `npm test` 33 pass / 0 fail (engine parity with the Solidity bits, type hash and digest, net-math sweeps, the agent never crossing a bound over 2,000 random pairs, relay and rate-limit rules, verify-deployment against a fake chain); `npm run build` 0 errors, 22 routes; `forge test --no-match-contract Fork` 36 passed (22 unit, 5 hostile-token, 3 net-math fuzz, 1 settlement fuzz, 4 invariants, 1 digest fixture); fork suite 4 passed against Robinhood Chain with real NVDA stock tokens and USDG. A browser end-to-end run on a local chain with chain id 4663 (two wallets: sign, export, import, check, approve, settle, replay refused, dashboard proof) passed 5 of 5 steps; it needs a local chain and is not part of `npm test`.
+2026-11-25 (UTC), Node.js v25.8.2, forge 1.5.1: `npm run typecheck` exit 0; `npm test` 41 pass / 0 fail (engine parity with the Solidity bits, type hash and digest, net-math sweeps, the agent never crossing a bound over 2,000 random pairs, sign-in session checks, tier math at exactly 0.1 %, board quotas and caps, alert derivation, bounded memory store, relay and rate-limit rules, verify-deployment against a fake chain); `npm run build` 0 errors, 22 routes; `forge test --no-match-contract Fork` 36 passed (22 unit, 5 hostile-token, 3 net-math fuzz, 1 settlement fuzz, 4 invariants, 1 digest fixture); fork suite 4 passed against Robinhood Chain with real NVDA stock tokens and USDG. A browser end-to-end run on a local chain with chain id 4663 (two wallets with a test token: holder and free tier, post to the board, take from it, check, approve, settle, replay refused, board pruned, bell alert, server quotas) passed 6 of 6 steps; it needs a local chain and is not part of `npm test`.
 
 ## Look at the site
 
@@ -98,7 +100,7 @@ Testnet: chain ID 46630, RPC https://rpc.testnet.chain.robinhood.com, explorer h
 
 ## Token
 
-$PARVEX is the community token of Parvex on Robinhood Chain. Contract address: announced on https://parvex.xyz at launch. It has no promised value. Planned: access to desk features and a shared order network once they exist; none of it is built.
+$PARVEX is the community token of Parvex on Robinhood Chain. Contract address: announced on https://parvex.xyz at launch. It has no promised value. Token features: holders (balance ≥ 0.1 % of totalSupply, read on chain) get 25 live orders on the order board instead of 3 and 100 saved counterparties instead of 5. Everything else, alerts included, is free.
 
 ## Deploy your own
 
@@ -113,6 +115,9 @@ $PARVEX is the community token of Parvex on Robinhood Chain. Contract address: a
 | `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | WalletConnect in the wallet dialog | 32 hex characters |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Shared rate-limit store | `https://…`, token string |
 | `STORE_KEY_PREFIX` | Key prefix in that store | short text, default `parvex:` |
+| `ROBINHOOD_TESTNET_RPC_URL` | Server reads on the testnet (board checks) | `https://…` |
+
+Without `KV_REST_API_URL`/`KV_REST_API_TOKEN` the board and saved lists live in the server's memory and the pages say "Not configured: saved data may be lost on restart". No secret is needed for sign-in.
 
 3. Point your domain at the deployment and check `/` (200), `/api/chain` (JSON with a block number) and `/api/assets` (JSON list).
 4. Contract: run the site locally, open `http://localhost:6700/deploy`, pick the network and deploy `ParvexMandateSettler` (no constructor arguments). Paste the address, block and transaction into `src/config/contracts.ts` under that network, then run `npm run verify-deployment`.

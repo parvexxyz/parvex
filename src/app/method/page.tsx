@@ -62,7 +62,7 @@ export default function MethodPage() {
           <Sec id="orders" title="Orders and signatures" status="Prototype">
             <p>When both sides accept, each wallet signs an EIP-712 order (domain &quot;Parvex Mandate Settler&quot;, version 1, the chain id and the settler address):</p>
             <p className="code text-[var(--text)]">{ORDER_TYPE_STRING}</p>
-            <p>The signed limit is, by default, the deal&apos;s own number for that side (the seller&apos;s exact net, the buyer&apos;s exact total), so your wider private limit never leaves your device. The other maker is locked as counterparty when known. Nonces are time-based. A contract wallet can approve an order by transaction instead (ERC-1271 signatures are also accepted). Orders move between two devices as a small JSON file you export and import; there is no order server.</p>
+            <p>The signed limit is, by default, the deal&apos;s own number for that side (the seller&apos;s exact net, the buyer&apos;s exact total), so your wider private limit never leaves your device. The other maker is locked as counterparty when known. Nonces are time-based. A contract wallet can approve an order by transaction instead (ERC-1271 signatures are also accepted). Orders move between two devices through the order board, or as a small JSON file you export and import.</p>
           </Sec>
           <Sec id="bits" title="Reason bits (checkDeal)" status="Prototype">
             <p>checkDeal returns a bitmask; 0 means settle() goes through unless a token misbehaves during the transfer. The terminal shows the same rules before anything is signed.</p>
@@ -112,11 +112,20 @@ export default function MethodPage() {
             <p>The settler has unit tests for every reason bit, hostile tokens (no-return, false-returning, fee-on-transfer, reentrant, reverting or gas-burning views), ERC-1271 wallets and on-chain approvals; fuzz tests of the net math and of settlement; invariants (the settler never holds a token, supply is conserved, a nonce never settles twice); and fork tests on Robinhood Chain with real NVDA and USDG. It has a written self-review. It has had no outside security review yet: start on the testnet, then small amounts.</p>
             <p>Stock tokens can be paused or blocked by their issuer; a blocked address makes the transfer fail and the whole deal revert.</p>
           </Sec>
+          <Sec id="board" title="Order relay board" status="Prototype">
+            <p>Signed orders can be posted to an open board instead of passing files. Anyone can read it and take an order into their book. Before listing, the server checks the order: this site&apos;s settler and chain, a valid EIP-712 signature from the maker (EOA), not expiring within a minute, nonce neither used nor cancelled on chain. On every read, expired orders and orders whose nonce the chain reports used (settled) or cancelled are removed. A counter-offer carries the id of the order it answers.</p>
+            <p>Limits, all on the server: live orders per wallet (free 3, holder 25), a per-network posting budget, a per-IP rate limit and a cap of 2,000 live orders per network; a full board refuses new posts and never drops existing ones. Storage: the configured KV store, else this server&apos;s memory (the page says so: data may be lost on restart).</p>
+          </Sec>
+          <Sec id="holder" title="Holder tier" status="Prototype">
+            <p>A wallet is a holder when balanceOf(wallet) × 1,000 ≥ totalSupply() of {"$PARVEX"}, both read on Robinhood Chain at each holder action (kept at most 30 s). The session is one EIP-4361 sign-in message (no gas, at most 4 h) checked on every request against a fixed domain list (never the request&apos;s Host header), chain 4663 and its expiry; Sign out revokes its nonce. No server secret exists. Before the token launches the tier shows &quot;Unlocks at launch&quot; and the free tier works fully.</p>
+          </Sec>
+          <Sec id="alerts" title="Alerts" status="Prototype">
+            <p>Level 1: the bell lists, for the connected wallet, settled deals (Settled events), board orders that match yours, counter-offers, and your orders expiring within 15 minutes, unread since your last look. Level 2: browser notifications while a Parvex tab is open, after you click Enable. Free for everyone and web only: no email, no Telegram, no push service; computed in your browser from public data.</p>
+          </Sec>
           <Sec id="planned" title="Planned, not built" status="Concept">
             <ul className="list-disc grid gap-2 pl-5">
-              <li>A counterparty discovery network that relays signed orders between desks (today: export and import a file).</li>
               <li>Partial fills and multi-asset baskets.</li>
-              <li>{"$PARVEX"} utility (see the token page). Parvex charges no fee today and the contract has no fee for Parvex.</li>
+              <li>ERC-1271 (contract wallet) sign-in for the holder session.</li>
             </ul>
           </Sec>
           <section className="border-t border-[var(--sline)] py-14">

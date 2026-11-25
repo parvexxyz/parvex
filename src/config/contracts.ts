@@ -1,4 +1,4 @@
-import { CHAIN, isAddress } from "@/config/brand";
+import { BRAND, CHAIN, isAddress } from "@/config/brand";
 
 /*
  * Networks a deal can settle on, and Parvex's own contract on each. Not deployed yet on either: the owner deploys it from /deploy
@@ -42,7 +42,7 @@ export type Network = (typeof NETWORKS)[NetKey];
 export const NET_KEYS: NetKey[] = ["mainnet", "testnet"];
 
 export type TestToken = { address: string; symbol: string; name: string; decimals: number };
-type Deployment = { settler: string; block: number; tx: string; tokens?: TestToken[] };
+type Deployment = { settler: string; block: number; tx: string; tokens?: TestToken[]; holderToken?: string };
 
 const DEPLOYED: Record<NetKey, Deployment> = {
   mainnet: { settler: "", block: 0, tx: "" },
@@ -75,3 +75,13 @@ export const CONTRACT_NAME = "ParvexMandateSettler" as const;
 export const explorerAddressOn = (net: NetKey, a: string) => `${NETWORKS[net].explorer}/address/${a}`;
 export const explorerTxOn = (net: NetKey, h: string) => `${NETWORKS[net].explorer}/tx/${h}`;
 export const explorerTokenOn = (net: NetKey, a: string) => `${NETWORKS[net].explorer}/token/${a}`;
+
+/**
+ * The token whose balance decides the holder tier: $PARVEX on Robinhood Chain mainnet once BRAND.ca is a real address; on a local
+ * test chain the test override may name a test ERC-20 instead. Null = "Unlocks at launch".
+ */
+export function holderTokenAddress(): string | null {
+  const t = DEPLOYMENTS.mainnet.holderToken;
+  if (t && isAddress(t)) return t.toLowerCase();
+  return isAddress(BRAND.ca) ? BRAND.ca.toLowerCase() : null;
+}
