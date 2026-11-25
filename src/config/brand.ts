@@ -22,7 +22,7 @@ const SLUG = "parvex";
 const TICKER = "PARVEX";
 const DOMAIN = "parvex.xyz";
 /** X account of the project (the owner's handle, exactly as written in the order). */
-const X_HANDLE = "parvex";
+const X_HANDLE = "parvex_xyz";
 
 export const BRAND = {
   name: NAME,
@@ -42,8 +42,8 @@ export const BRAND = {
   description: `${NAME} is an OTC negotiation terminal for Robinhood Chain. A buyer and a seller each enter a mandate: asset, amount, price limit and expiry. The engine matches mandates, a rule-based agent trades counter-offers strictly inside both limits, and every condition is shown with its numbers: the buyer's budget, the seller's minimum net after fees. Both sides review and sign; one transaction moves both legs or nothing. Non-custodial: tokens stay in your wallet until the swap.`,
   x: `https://x.com/${X_HANDLE}`,
   xHandle: `@${X_HANDLE}`,
-  // Public source repository: none yet (the owner has none yet), so every GitHub link stays hidden.
-  github: "",
+  // Public source repository (open source, MIT).
+  github: "https://github.com/parvexxyz/parvex",
   ca: CA,
 } as const;
 
