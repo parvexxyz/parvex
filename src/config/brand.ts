@@ -3,7 +3,7 @@
 // and every explorer link derive from it. Anything that is not a 0x + 40 hex address is treated as "not launched yet".
 
 /** Contract address of $PARVEX on Robinhood Chain. "TBA" until the token exists. */
-const CA: string = "TBA";
+const CA: string = "0x438d2b2db6d6adfc46b50ea7b3861a18861efa59";
 
 /**
  * True once the domain points at this deployment. While false, the production *.vercel.app host is served as is (kept

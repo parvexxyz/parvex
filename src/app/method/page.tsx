@@ -9,6 +9,7 @@ import { BITS } from "@/lib/otc/bits";
 import { ORDER_TYPE_STRING } from "@/lib/otc/eip712";
 import { FAQ } from "@/lib/faq";
 import { breadcrumbLd, faqLd, ldJson, pageMeta } from "@/lib/seo";
+import { TOKEN } from "@/config/brand";
 
 export const metadata = pageMeta({
   path: "/method",
@@ -117,7 +118,7 @@ export default function MethodPage() {
             <p>Limits, all on the server: live orders per wallet (free 3, holder 25), a per-network posting budget, a per-IP rate limit and a cap of 2,000 live orders per network; a full board refuses new posts and never drops existing ones. Storage: the configured KV store, else this server&apos;s memory (the page says so: data may be lost on restart).</p>
           </Sec>
           <Sec id="holder" title="Holder tier" status="Prototype">
-            <p>A wallet is a holder when balanceOf(wallet) × 1,000 ≥ totalSupply() of {"$PARVEX"}, both read on Robinhood Chain at each holder action (kept at most 30 s). The session is one EIP-4361 sign-in message (no gas, at most 4 h) checked on every request against a fixed domain list (never the request&apos;s Host header), chain 4663 and its expiry; Sign out revokes its nonce. No server secret exists. Before the token launches the tier shows &quot;Unlocks at launch&quot; and the free tier works fully.</p>
+            <p>A wallet is a holder when balanceOf(wallet) × 1,000 ≥ totalSupply() of {"$PARVEX"}, both read on Robinhood Chain at each holder action (kept at most 30 s). The session is one EIP-4361 sign-in message (no gas, at most 4 h) checked on every request against a fixed domain list (never the request&apos;s Host header), chain 4663 and its expiry; Sign out revokes its nonce. No server secret exists.{TOKEN.isLive ? null : <> Before the token launches the tier shows &quot;Unlocks at launch&quot; and the free tier works fully.</>}</p>
           </Sec>
           <Sec id="alerts" title="Alerts" status="Prototype">
             <p>Level 1: the bell lists, for the connected wallet, settled deals (Settled events), board orders that match yours, counter-offers, and your orders expiring within 15 minutes, unread since your last look. Level 2: browser notifications while a Parvex tab is open, after you click Enable. Free for everyone and web only: no email, no Telegram, no push service; computed in your browser from public data.</p>
