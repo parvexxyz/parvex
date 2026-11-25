@@ -11,7 +11,7 @@ This repository is the working code behind https://parvex.xyz.
 - **What runs today.** The terminal (mandate book, matching, zone of agreement, the negotiation agent, the deal check, review and authorize), practice mode on sample mandates with no wallet, EIP-712 order signing, an open order relay board (post, take, withdraw; checked against the chain), export and import of signed orders, exact-amount token approvals, the contract's `checkDeal` pre-check and `settle`, a dashboard of settlement proofs read from the contract's logs, and free alerts (a bell inbox plus browser notifications).
 - **The agent is plain code.** It is deterministic and rule-based (no language model): it sees only its own limit and the other side's last offer, never offers past its limit, and never signs anything.
 - **Live data.** Robinhood Chain head block, gas and Chainlink ETH/USD; Robinhood stock tokens proven on chain (beacon-proxy code hash, beacon slot, minted supply) with their Chainlink stock feeds; USDG and WETH metadata read on chain. Stock tokens are tokens on Robinhood Chain, not the shares themselves.
-- **The contract is not deployed yet.** `ParvexMandateSettler` is written and tested (unit, fuzz, invariant and Robinhood Chain fork tests, plus a written self-review) but has had no outside security review. Until it is deployed on a network, the terminal runs in practice mode there.
+- **The contract is live on Robinhood Chain.** `ParvexMandateSettler` at `0x71f84ce6cb069aeb4eb2627dbaa2a2e30cceea1f` (source verified on Blockscout; `verify-deployment` MATCH). It has unit, fuzz, invariant and Robinhood Chain fork tests plus a written self-review, but no outside security review: start with small amounts. It is not deployed on the testnet, where the terminal runs in practice mode.
 - **Token features.** A wallet holding at least 0.1 % of the $PARVEX supply (read on chain after a gas-free EIP-4361 sign-in) gets larger server quotas: 25 live orders on the board instead of 3, and 100 saved counterparties instead of 5. Until the token launches this shows "Unlocks at launch" and the free tier works fully.
 - **Not claimed.** Nothing here is investment advice or a guarantee of safety. $PARVEX has no promised value and Parvex works without it. Partial fills are planned and not built.
 
@@ -19,7 +19,7 @@ This repository is the working code behind https://parvex.xyz.
 
 | Path | What it is |
 |---|---|
-| `src/app/` | Pages (`/`, `/terminal`, `/dashboard`, `/method`, `/token`, local-only `/deploy`) and API routes (`/api/chain`, `/api/assets`, `/api/desk`, `/api/rpc`, `/api/board`, `/api/holder`, `/api/lists`). |
+| `src/app/` | Pages (`/`, `/terminal`, `/dashboard`, `/method`, `/token`) and API routes (`/api/chain`, `/api/assets`, `/api/desk`, `/api/rpc`, `/api/board`, `/api/holder`, `/api/lists`). |
 | `src/components/` | Interface components: terminal, dashboard, holder panel, order board, alert bell, home sections, wallet connection, header and footer. |
 | `src/lib/holder/`, `src/lib/board/` | Sign-in session verification, holder tier math and quotas, order board rules. |
 | `src/config/` | `brand.ts` (name, ticker, token address, links), `contracts.ts` (networks and deployed addresses), `dex.ts`, `chain.ts`. |
@@ -66,14 +66,14 @@ Open http://localhost:6700. Everything works with no configuration: live chain d
 
 | Contract | Robinhood Chain | Robinhood Chain Testnet |
 |---|---|---|
-| `ParvexMandateSettler` | not deployed yet | not deployed yet |
+| `ParvexMandateSettler` | [`0x71f84ce6cb069aeb4eb2627dbaa2a2e30cceea1f`](https://robinhoodchain.blockscout.com/address/0x71f84ce6cb069aeb4eb2627dbaa2a2e30cceea1f?tab=contract) (block 122889194, source verified) | not deployed |
 
 `ParvexMandateSettler` (with the internal library `ParvexNetMath`) settles one OTC deal atomically. Each side signs an EIP-712 order with the exact terms, its own limit (the seller's minimum net after its fee, the buyer's maximum total including its fee), an optional fee of at most 0.50 % to its own recipient, an optional counterparty lock, an expiry and a nonce. `checkDeal` returns a 21-bit reason mask (0 = settleable); `settle` moves the asset seller → buyer and the payment buyer → seller with `transferFrom` in one transaction, measuring every leg by the receiver's balance change. It has no owner, no admin, no fee for Parvex, no upgrade, no payable function, and never holds a balance.
 
 ## Verify a deployment
 
 ```
-npm run verify-deployment -- --settler <address> --settler-tx <creation tx hash>
+npm run verify-deployment -- --settler 0x71f84ce6cb069aeb4eb2627dbaa2a2e30cceea1f --settler-tx 0xdb912ad0683d4fd3a47600af451892368e8079ce3473b3499086269cf4bbeb87
 ```
 
 The script compares the bytecode on chain with the build in this repository (the two immutable words are checked by value: the chain id and the EIP-712 domain of that address) and prints MATCH or the first difference. Set `VERIFY_RPC_URL` to the testnet RPC for a testnet deployment.
@@ -120,7 +120,7 @@ $PARVEX is the community token of Parvex on Robinhood Chain. Contract address: a
 Without `KV_REST_API_URL`/`KV_REST_API_TOKEN` the board and saved lists live in the server's memory and the pages say "Not configured: saved data may be lost on restart". No secret is needed for sign-in.
 
 3. Point your domain at the deployment and check `/` (200), `/api/chain` (JSON with a block number) and `/api/assets` (JSON list).
-4. Contract: run the site locally, open `http://localhost:6700/deploy`, pick the network and deploy `ParvexMandateSettler` (no constructor arguments). Paste the address, block and transaction into `src/config/contracts.ts` under that network, then run `npm run verify-deployment`.
+4. Contract (only for your own deployment): deploy `ParvexMandateSettler` from `contracts/` (no constructor arguments) with your own tooling. Paste the address, block and transaction into `src/config/contracts.ts` under that network, then run `npm run verify-deployment`.
 
 ## Contributing
 

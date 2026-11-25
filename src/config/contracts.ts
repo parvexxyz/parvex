@@ -1,8 +1,8 @@
 import { BRAND, CHAIN, isAddress } from "@/config/brand";
 
 /*
- * Networks a deal can settle on, and Parvex's own contract on each. Not deployed yet on either: the owner deploys it from /deploy
- * (localhost only) to the network of their choice, pastes the three values below and runs
+ * Networks a deal can settle on, and Parvex's own contract on each. LIVE on Robinhood Chain mainnet since 25 Nov 2026; the testnet
+ * has none. A new deployment: paste the three values below and run
  * `npm run verify-deployment -- --settler <address> --settler-tx <tx>` (VERIFY_RPC_URL = that network's RPC).
  *   settler  ParvexMandateSettler (+ internal library ParvexNetMath, inlined, nothing to link): EIP-712 orders, checkDeal reason bits,
  *            settle() moves both legs with transferFrom in one transaction, cancel / cancelUpTo, on-chain order approval.
@@ -45,7 +45,8 @@ export type TestToken = { address: string; symbol: string; name: string; decimal
 type Deployment = { settler: string; block: number; tx: string; tokens?: TestToken[]; holderToken?: string };
 
 const DEPLOYED: Record<NetKey, Deployment> = {
-  mainnet: { settler: "", block: 0, tx: "" },
+  // Deployed by the owner 25 Nov 2026 (gasUsed 1,733,680); verify-deployment MATCH incl. immutables.
+  mainnet: { settler: "0x71f84ce6cb069aeb4eb2627dbaa2a2e30cceea1f", block: 122889194, tx: "0xdb912ad0683d4fd3a47600af451892368e8079ce3473b3499086269cf4bbeb87" },
   testnet: { settler: "", block: 0, tx: "" },
 };
 
